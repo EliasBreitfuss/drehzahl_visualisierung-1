@@ -1,55 +1,49 @@
 import streamlit as st
 import numpy as np
-import matplotlib.pyplot as plt
-import time
 
 st.set_page_config(page_title="Drehzahl-Visualisierung", page_icon="⚙️", layout="centered")
 
-st.title("⚙️ Drehzahl-Visualisierung")
-st.write("Gib die **U/min** und den **Kreisdurchmesser (in cm)** ein, um die Bewegung zu sehen:")
+st.title("⚙️ Drehzahl-Visualisierung (flüssig)")
+st.write("Gib die **U/min** und den **Kreisdurchmesser (in cm)** ein:")
 
-# Eingaben
-rpm = st.number_input("Umdrehungen pro Minute (U/min)", min_value=1.0, max_value=10000.0, value=60.0, step=1.0)
-durchmesser = st.number_input("Kreisdurchmesser (cm)", min_value=0.1, max_value=1000.0, value=10.0, step=0.1)
+rpm = st.number_input("Umdrehungen pro Minute (U/min)", 1.0, 10000.0, 60.0, 1.0)
+durchmesser = st.number_input("Kreisdurchmesser (cm)", 0.1, 1000.0, 10.0, 0.1)
 
-# Berechnungen
-radius = durchmesser / 2 / 100  # in Meter
-umfang = 2 * np.pi * radius
-u_pro_sekunde = rpm / 60
-v = umfang * u_pro_sekunde  # m/s
+radius = durchmesser / 2
+umfang = np.pi * durchmesser
+v = umfang * rpm / 60 / 100  # m/s
 
 st.write(f"**Umfangsgeschwindigkeit:** {v:.2f} m/s ({v*3.6:.2f} km/h)")
 
-# Session-State für Start/Stopp speichern
-if "running" not in st.session_state:
-    st.session_state.running = False
+canvas_html = f"""
+<canvas id="circleCanvas" width="300" height="300"></canvas>
+<script>
+const canvas = document.getElementById('circleCanvas');
+const ctx = canvas.getContext('2d');
+const rpm = {rpm};
+let angle = 0;
+function draw() {{
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.beginPath();
+  ctx.arc(150, 150, 100, 0, 2*Math.PI);
+  ctx.strokeStyle = '#888';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  const rad = angle * Math.PI / 180;
+  const x = 150 + 100 * Math.cos(rad);
+  const y = 150 + 100 * Math.sin(rad);
+  ctx.beginPath();
+  ctx.moveTo(150,150);
+  ctx.lineTo(x,y);
+  ctx.strokeStyle = 'red';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+  angle += rpm * 360 / 60 / 60; // 60 fps
+  if (angle > 360) angle -= 360;
+  requestAnimationFrame(draw);
+}}
+draw();
+</script>
+"""
 
-# Buttons
-col1, col2 = st.columns(2)
-with col1:
-    if st.button("▶️ Start"):
-        st.session_state.running = True
-with col2:
-    if st.button("⏸️ Stopp"):
-        st.session_state.running = False
-
-# Platzhalter für Plot
-plot_area = st.empty()
-
-# Animation
-while st.session_state.running:
-    angle = (time.time() * u_pro_sekunde * 2 * np.pi) % (2 * np.pi)
-
-    fig, ax = plt.subplots()
-    circle = plt.Circle((0, 0), radius, color='lightgray', fill=False, linewidth=3)
-    ax.add_artist(circle)
-    ax.plot([0, radius * np.cos(angle)], [0, radius * np.sin(angle)], color='red', linewidth=3)
-
-    ax.set_xlim(-radius * 1.2, radius * 1.2)
-    ax.set_ylim(-radius * 1.2, radius * 1.2)
-    ax.set_aspect('equal')
-    ax.axis('off')
-
-    plot_area.pyplot(fig)
-    plt.close(fig)
-    time.sleep(0.05)
+st.components.v1.html(canvas_html, height=320)
