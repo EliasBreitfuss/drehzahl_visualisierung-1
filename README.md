@@ -1,21 +1,17 @@
-# ⚙️ Drehzahl-Visualisierung
+# ⚙️ Drehzahl-Visualisierung (flüssig)
 
-Ein einfaches Streamlit-Tool zur Veranschaulichung der Drehbewegung basierend auf U/min und Kreisdurchmesser.
+Ein interaktives Online-Tool, um Drehbewegungen anschaulich darzustellen.  
+Die Animation läuft direkt im Browser mit flüssiger Bewegung (60 FPS).
 
 ## 🧩 Eingaben
-- **U/min** (Umdrehungen pro Minute)
-- **Kreisdurchmesser** in cm
+- **U/min (Umdrehungen pro Minute)**
+- **Kreisdurchmesser (cm)**
 
 ## 🔄 Ausgabe
-- Ein animierter Kreis mit rotem Radius-Strich
-- Berechnete Umfangsgeschwindigkeit
+- Animierter Kreis mit rotem Radius-Strich
+- Berechnete Umfangsgeschwindigkeit (m/s und km/h)
 
-## 🚀 Installation & Start
-
+## 🚀 Lokaler Start
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
-```
-
-## ☁️ Online-Deployment
-Du kannst das Projekt auf [Streamlit Cloud](https://share.streamlit.io) hosten.
